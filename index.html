@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetireLab | 자산×소비 등급 진단 — 내 등급은?</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --success: #16a34a;
+            --warning: #eab308;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --gold: #d97706;
+            --gold-light: rgba(217, 119, 6, 0.20);
+            --real-estate: #8b5cf6;
+            --finance: #10b981;
+            --brand-blue: #2563eb;
+            --brand-yellow: #fde047;
+            --brand-dark: #1e293b;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-hint {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: -4px;
+            margin-bottom: 8px;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            -moz-appearance: textfield;
+        }
+        
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"]:focus, select:focus { border-color: var(--primary); }
+
+        /* Range Slider Style */
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type="range"]:focus { outline: none; }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 8px; cursor: pointer;
+            background: #e2e8f0; border-radius: 4px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            height: 24px; width: 24px; border-radius: 50%;
+            background: var(--primary); cursor: pointer;
+            -webkit-appearance: none; margin-top: -8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .savings-value {
+            color: var(--primary); font-weight: bold; font-size: 1.1rem;
+        }
+
+        .radio-group { display: flex; gap: 12px; }
+        .radio-btn { flex: 1; position: relative; }
+        .radio-btn input { display: none; }
+        .radio-btn label {
+            display: block; text-align: center; padding: 12px;
+            border: 1px solid #cbd5e1; border-radius: 8px;
+            cursor: pointer; transition: all 0.2s; font-weight: 500;
+        }
+        .radio-btn input:checked + label {
+            background-color: var(--primary-light);
+            border-color: var(--primary); color: var(--primary);
+        }
+
+        /* 상세 주거비 입력 그리드 */
+        .sub-inputs {
+            display: flex; gap: 8px; margin-top: 8px;
+            background: #f1f5f9; padding: 12px; border-radius: 8px;
+        }
+        .sub-input-group { flex: 1; display: flex; flex-direction: column; }
+        .sub-input-label { font-size: 0.75rem; color: #475569; margin-bottom: 6px; text-align: center; font-weight: 600; }
+        .sub-input-group input { padding: 8px; font-size: 0.9rem; text-align: center; }
+
+        .btn-submit {
+            width: 100%; background-color: var(--primary); color: white;
+            border: none; padding: 16px; border-radius: 8px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+
+        /* 결과 화면 스타일 */
+        #resultSection { display: none; }
+        
+        .result-header {
+            text-align: center; padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;
+        }
+
+        .grade-badge {
+            display: inline-block; background: var(--primary); color: white;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.9rem;
+            font-weight: bold; margin-bottom: 8px;
+        }
+
+        /* 세대 시뮬레이션 박스 */
+        .decade-forecast {
+            background: linear-gradient(135deg, #1e3a8a, #312e81);
+            border-radius: 12px; padding: 20px; color: white;
+            margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;
+        }
+        .forecast-title { font-size: 0.95rem; color: #bfdbfe; margin-bottom: 8px; font-weight: 600; }
+        .forecast-grade { font-size: 1.5rem; font-weight: 800; color: #fde047; margin-bottom: 6px; }
+        .forecast-desc { font-size: 0.85rem; color: #e0e7ff; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; display: inline-block; }
+
+        /* 가용 예산 박스 */
+        .bonus-box {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #86efac; border-radius: 12px;
+            padding: 16px; margin-bottom: 24px; text-align: center;
+        }
+        .bonus-title {
+            font-size: 0.85rem; color: #065f46; font-weight: bold;
+            margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .bonus-math { font-size: 0.9rem; color: #166534; margin-bottom: 4px; }
+        .bonus-result { font-size: 1.2rem; font-weight: 800; color: #14532d; }
+
+        .limit-list { list-style: none; padding-bottom: 16px; border-bottom: 2px solid #e2e8f0; margin-bottom: 24px; }
+        .limit-item {
+            display: flex; align-items: flex-start; padding: 16px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .limit-item:last-child { border-bottom: none; }
+        
+        .limit-icon { font-size: 1.5rem; margin-right: 12px; line-height: 1.2; }
+        .limit-content { flex: 1; }
+        .limit-title { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+        .limit-value { font-size: 1.2rem; font-weight: bold; color: var(--text-main); margin-bottom: 4px;}
+        .limit-desc { font-size: 0.85rem; color: var(--primary); margin-top: 2px; line-height: 1.4; }
+
+        /* 로드맵 타임라인 스타일 */
+        .roadmap-container { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e2e8f0; }
+        .roadmap-header { font-weight: bold; font-size: 1.1rem; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .roadmap { position: relative; padding-left: 24px; }
+        .roadmap::before { content: ''; position: absolute; left: 5px; top: 4px; bottom: 0; width: 2px; background: #cbd5e1; }
+        .roadmap-step { position: relative; margin-bottom: 24px; }
+        .roadmap-step:last-child { margin-bottom: 0; }
+        .roadmap-step::before { content: ''; position: absolute; left: -24.5px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 3px solid var(--primary); z-index: 1; }
+        .roadmap-step.step-s::before { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-light); }
+        .roadmap-step.step-transition::before { background: var(--warning); border-color: var(--warning); box-shadow: 0 0 0 3px #fef08a; }
+        
+        .step-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+        .step-grade { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
+        .step-s .step-grade { color: var(--gold); }
+        .step-transition .step-grade { color: #b45309; font-size: 1rem;}
+        
+        .step-age { font-size: 0.9rem; color: #1e40af; background: #dbeafe; padding: 2px 8px; border-radius: 12px; font-weight: 700; }
+        .step-time { font-size: 0.8rem; color: var(--text-muted); }
+        .step-target { font-size: 0.8rem; font-weight: 400; color: var(--text-muted); margin-left: 4px; }
+        .step-title { font-weight: bold; color: var(--text-main); font-size: 0.95rem; margin-bottom: 4px; }
+        .step-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
+
+        .efficiency-badge { margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 0.9rem; text-align: center; }
+        .efficiency-good { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .efficiency-bad { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .highlight { font-weight: bold; color: var(--danger); }
+        .highlight-success { font-weight: bold; color: var(--success); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px;">
+            <div style="background: linear-gradient(135deg, #2563eb, #1e40af); 
+                        border-radius: 10px; padding: 6px 10px; 
+                        font-size: 1.1rem; font-weight: 900; color: white; 
+                        letter-spacing: -0.5px;">
+                Retire<span style="color:#fde047;">Lab</span>
+            </div>
+            <h1 style="font-size: 1.3rem; margin: 0;">자산×소비 등급 진단</h1>
+        </div>
+        <p>박종경 변호사 자산등급 × 김경필 소비기준 통합 진단</p>
+    </header>
+
+    <!-- 입력 폼 -->
+    <div class="card" id="inputSection">
+        <div class="form-group">
+            <label>실제 나이</label>
+            <div style="position: relative;">
+                <input type="number" id="currentAge" placeholder="예: 34" min="30" max="49">
+                <span style="position: absolute; right: 16px; top: 12px; color: #64748b;">세</span>
+            </div>
+            <span class="form-hint" style="margin-top: 4px;">현재 버전은 30대와 40대만 지원합니다.</span>
+        </div>
+
+        <div class="form-group">
+            <label>월 평균 소득 <span class="form-hint" style="margin:0;">(세후)</span></label>
+            <div style="position: relative;">
+                <input type="number" id="monthlyIncome" placeholder="예: 600" min="0">
+                <span style="position: absolute; right: 16px; top: 12px; color: #64748b;">만원</span>
+            </div>
+        </div>
+
+        <div class="form-group" style="background: var(--primary-light); padding: 16px; border-radius: 8px; border: 1px solid #bfdbfe;">
+            <label>🎯 목표 월 저축률 (선차감) 
+                <span class="savings-value" id="savingsRateVal">40%</span>
+            </label>
+            <input type="range" id="targetSavingsRate" min="10" max="80" step="5" value="40" 
+                   oninput="document.getElementById('savingsRateVal').innerText = this.value + '%'">
+            <span class="form-hint" style="text-align: center; margin-top: 8px; color: var(--primary);">
+                💡 주담대 원금 상환액이 있다면 저축률에 포함해서 입력하세요.<br>
+                저축률을 높일수록 S등급 도달 나이가 빨라집니다.
+            </span>
+        </div>
+
+        <div class="form-group">
+            <label>주거 형태</label>
+            <div class="radio-group" style="margin-bottom: 8px;">
+                <div class="radio-btn">
+                    <input type="radio" name="housing" id="houseYes" value="yes" checked>
+                    <label for="houseYes">자가 보유</label>
+                </div>
+                <div class="radio-btn">
+                    <input type="radio" name="housing" id="houseNo" value="no">
+                    <label for="houseNo">무주택</label>
+                </div>
+            </div>
+
+            <div id="housingCostOwner" class="sub-inputs">
+                <div class="sub-input-group">
+                    <span class="sub-input-label">주담대 원금<br><span style="color:var(--success); font-size:0.65rem;">(저축 인정)</span></span>
+                    <input type="number" id="costPrincipal" placeholder="예: 100" min="0">
+                </div>
+                <div class="sub-input-group">
+                    <span class="sub-input-label">주담대 이자<br><span style="color:var(--danger); font-size:0.65rem;">(소비 차감)</span></span>
+                    <input type="number" id="costInterest" placeholder="예: 50" min="0">
+                </div>
+                <div class="sub-input-group">
+                    <span class="sub-input-label">월 관리비<br><span style="color:var(--danger); font-size:0.65rem;">(소비 차감)</span></span>
+                    <input type="number" id="costMaintOwner" placeholder="예: 20" min="0">
+                </div>
+            </div>
+
+            <div id="housingCostRenter" class="sub-inputs" style="display: none;">
+                <div class="sub-input-group">
+                    <span class="sub-input-label">월세<br><span style="color:var(--danger); font-size:0.65rem;">(소비 차감)</span></span>
+                    <input type="number" id="costRent" placeholder="예: 80" min="0">
+                </div>
+                <div class="sub-input-group">
+                    <span class="sub-input-label">보증금대출이자<br><span style="color:var(--danger); font-size:0.65rem;">(소비 차감)</span></span>
+                    <input type="number" id="costJeonseInterest" placeholder="예: 40" min="0">
+                </div>
+                <div class="sub-input-group">
+                    <span class="sub-input-label">월 관리비<br><span style="color:var(--danger); font-size:0.65rem;">(소비 차감)</span></span>
+                    <input type="number" id="costMaintRenter" placeholder="예: 15" min="0">
+                </div>
+            </div>
+            <span class="form-hint" style="margin-top: 6px; text-align: center;">※ 모른다면 비워두셔도 기본 한도로 계산됩니다. 단위: 만원</span>
+        </div>
+
+        <div class="form-group">
+            <label>📈 금융자산 예상 연수익률</label>
+            <span class="form-hint">선택한 수익률은 금융 순자산에만 적용됩니다.<br>주택 순자산과 전·월세 보증금에는 적용하지 않습니다.<br>실제 수익률은 달라질 수 있습니다.</span>
+            <div class="radio-group">
+                <div class="radio-btn">
+                    <input type="radio" name="returnRate" id="rate3" value="3" checked>
+                    <label for="rate3">3% 보수적</label>
+                </div>
+                <div class="radio-btn">
+                    <input type="radio" name="returnRate" id="rate5" value="5">
+                    <label for="rate5">5% 표준</label>
+                </div>
+                <div class="radio-btn">
+                    <input type="radio" name="returnRate" id="rate7" value="7">
+                    <label for="rate7">7% 공격적</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label id="labelRealEstate">🏠 주택 순자산</label>
+            <span class="form-hint" id="hintRealEstate">(현재 주택 시세 - 주담대 잔액)<br>※ 기본 시뮬레이션에서는 주택 가격상승률 0% 적용</span>
+            <div style="position: relative;">
+                <input type="number" id="realEstate" placeholder="예: 60000" min="0">
+                <span style="position: absolute; right: 16px; top: 12px; color: #64748b;">만원</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>💵 금융 순자산</label>
+            <span class="form-hint">현금·예금·주식·ETF·연금 - 신용대출<br>※ 주택 순자산과 전·월세 보증금은 포함하지 마세요.</span>
+            <div style="position: relative;">
+                <input type="number" id="financial" placeholder="예: 10000" min="0">
+                <span style="position: absolute; right: 16px; top: 12px; color: #64748b;">만원</span>
+            </div>
+        </div>
+
+        <!-- 소비등급 진단 (선택 입력) -->
+        <div style="border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div style="font-weight: 700; margin-bottom: 4px; cursor: pointer; color: var(--primary);" 
+                 onclick="toggleConsumption(this)">
+                📊 소비등급도 같이 진단받기 (선택) ▼
+            </div>
+            <div id="consumptionInputs" style="display: none; margin-top: 16px;">
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 0.9rem;">🚗 현재 타는 차량 가격</label>
+                    <div style="position: relative;">
+                        <input type="number" id="carPrice" placeholder="없으면 0 입력. 예: 3000" min="0">
+                        <span style="position: absolute; right: 16px; top: 12px; color: #64748b;">만원</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 0.9rem;">✈️ 지난 1년 여행비 합산</label>
+                    <div style="position: relative;">
+                        <input type="number" id="annualTravel" placeholder="예: 200" min="0">
+                        <span style="position: absolute; right: 16px; top: 12px; color: #64748b;">만원</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 0.9rem;">🍽️ 월 평균 식비 (외식·배달 포함)</label>
+                    <div style="position: relative;">
+                        <input type="number" id="monthlyFood" placeholder="예: 80" min="0">
+                        <span style="position: absolute; right: 16px; top: 12px; color: #64748b;">만원</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.9rem;">🎯 월 평균 레저·취미비</label>
+                    <div style="position: relative;">
+                        <input type="number" id="monthlyLeisure" placeholder="예: 30" min="0">
+                        <span style="position: absolute; right: 16px; top: 12px; color: #64748b;">만원</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-submit" onclick="calculateLimits()" 
+                style="background: linear-gradient(135deg, #2563eb, #1e40af); 
+                       font-size: 1.1rem; padding: 18px; letter-spacing: -0.3px;">
+            📊 내 자산×소비 등급 진단하기
+        </button>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div class="card" id="resultSection">
+        
+        <!-- 세대 시뮬레이션 박스 -->
+        <div class="decade-forecast" id="decadeForecast">
+            <div class="forecast-title" id="forecastTitle">⏳ 세대 위치 예측</div>
+            <div class="forecast-grade" id="forecastGrade">A 등급 달성 예상</div>
+            <div class="forecast-desc" id="forecastDesc">예상 순자산 8억 5천만 원</div>
+            <div id="forecastDisclaimer" style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px; line-height: 1.3;"></div>
+        </div>
+
+        <!-- 현금흐름 적자 경고 배너 -->
+        <div id="cashflowWarning" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px; margin-bottom:16px; text-align:center;">
+            <div style="font-weight:700; color:#dc2626; margin-bottom:6px; font-size:1.1rem;">🚨 월 현금흐름 적자 경보</div>
+            <div id="cashflowText" style="font-size:0.9rem; color:#991b1b; line-height:1.6;"></div>
+        </div>
+        
+        <!-- 현금흐름 흑자 표시 -->
+        <div id="cashflowSuccess" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:16px; margin-bottom:16px; text-align:center;">
+            <div style="font-weight:700; color:#166534; margin-bottom:6px; font-size:1.1rem;">✅ 월 현금흐름 여유</div>
+            <div id="cashflowSuccessText" style="font-size:0.9rem; color:#14532d; line-height:1.6;"></div>
+        </div>
+
+        <div class="result-header" style="border-top: none; padding-top: 0;">
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px;">
+                <div class="grade-badge" id="gradeBadge">자산 B등급</div>
+                <div class="grade-badge" id="consumptionBadge" style="display: none; background-color: #64748b;">소비 -등급</div>
+            </div>
+            <div id="crossResultCard" style="display: none; margin-bottom: 12px; padding: 12px; border-radius: 8px; text-align: left; font-size: 0.9rem; line-height: 1.6;"></div>
+            
+            <!-- 소비 초과 항목 요약 경고 배너 -->
+            <div id="overLimitBanner" style="display:none; margin-bottom: 12px; text-align: left;"></div>
+            
+            <h2 style="font-size: 1.2rem; color: var(--text-main); letter-spacing: -0.3px;">
+                💸 나의 소비 허용 한도
+            </h2>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                ※ 기본 소비기준에 현재 자산등급을 반영해 최대 ±10% 범위에서 RetireLab이 자체 보정했습니다.
+            </div>
+        </div>
+
+        <!-- 가용 예산 박스 -->
+        <div class="bonus-box" id="bonusBox">
+            <div class="bonus-title">✂️ 선저축·주거비 차감 후 생활가용예산</div>
+            <div class="bonus-math" id="bonusMath">월소득(600) - 목표저축(240) - 주거비(70)</div>
+            <div class="bonus-result" id="bonusResult">생활가용예산: 월 290만 원</div>
+        </div>
+
+        <ul class="limit-list">
+            <li class="limit-item">
+                <span class="limit-icon" style="font-size:2rem;">💰</span>
+                <div class="limit-content">
+                    <div class="limit-title">1순위 선차감 저축액</div>
+                    <div class="limit-value" style="color: var(--danger);" id="valSavings">240만 원</div>
+                    <div class="limit-desc" style="color: var(--danger);" id="descSavings">목표 저축률 40%</div>
+                </div>
+            </li>
+            
+            <li class="limit-item" style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin: 8px 0; border: 1px solid #e2e8f0;">
+                <span class="limit-icon">🏠</span>
+                <div class="limit-content">
+                    <div class="limit-title">월 주거비 (소비분) 상한</div>
+                    <div class="limit-value" id="valHousing">90만 원</div>
+                    <div id="descHousingDiagnosis"></div>
+                </div>
+            </li>
+
+            <li class="limit-item">
+                <span class="limit-icon">🚗</span>
+                <div class="limit-content">
+                    <div class="limit-title">차량 최대 구매가</div>
+                    <div class="limit-value" id="valCar">3,600만 원</div>
+                    <div id="descCarDiagnosis"></div>
+                </div>
+            </li>
+            <li class="limit-item">
+                <span class="limit-icon">✈️</span>
+                <div class="limit-content">
+                    <div class="limit-title">연간 여행 예산</div>
+                    <div class="limit-value" id="valTravel">360만 원</div>
+                    <div id="descTravelDiagnosis"></div>
+                </div>
+            </li>
+            <li class="limit-item">
+                <span class="limit-icon">🍽️</span>
+                <div class="limit-content">
+                    <div class="limit-title">월 식비 상한 (외식/배달)</div>
+                    <div class="limit-value" id="valFood">150만 원</div>
+                    <div id="descFoodDiagnosis"></div>
+                </div>
+            </li>
+            <li class="limit-item">
+                <span class="limit-icon">🎯</span>
+                <div class="limit-content">
+                    <div class="limit-title">월 레저·취미 상한</div>
+                    <div class="limit-value" id="valLeisure">60만 원</div>
+                    <div id="descLeisureDiagnosis"></div>
+                </div>
+            </li>
+        </ul>
+
+        <!-- 등급 성장 로드맵 -->
+        <div class="roadmap-container" id="roadmapSection">
+            <div class="roadmap-header">🚀 S등급을 향한 나이별 타임라인</div>
+            <div class="roadmap" id="roadmapTimeline">
+                <!-- JS에서 동적 생성됨 -->
+            </div>
+            <div id="efficiencyBadge"></div>
+        </div>
+        
+        <button class="btn-submit" 
+                style="background: linear-gradient(135deg, #0ea5e9, #0284c7); margin-bottom: 12px;" 
+                onclick="copyResult()">
+            📤 결과 복사해서 공유하기
+        </button>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-submit" style="background-color: #64748b; flex: 1;" onclick="resetForm()">
+                ✏️ 수치 수정하기
+            </button>
+            <button class="btn-submit" style="background-color: #94a3b8; flex: 1;" onclick="resetFormFull()">
+                🔄 처음부터
+            </button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8;">
+            <div style="font-weight: 700; color: #64748b; margin-bottom: 4px;">
+                RetireLab 리타이어랩
+            </div>
+            <div style="margin-bottom: 8px;">노코드 AI로 만드는 재테크 앱</div>
+            <a href="https://blog.naver.com/retirelab" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 8px;">
+                📝 네이버 블로그 방문하기
+            </a>
+            <div style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.4;">
+                본 결과는 개인 참고용 단순 시뮬레이션입니다.<br>
+                공식 재무상담이나 투자 권유가 아닙니다.<br>
+                금융자산 수익률은 사용자가 선택한 가정이며, 세금·물가·소득 변화·시장 손실은 반영하지 않습니다.<br>
+                주택 순자산과 전·월세 보증금은 가격상승률 및 투자수익률 0%로 계산합니다.<br><br>
+                기준: 박종경 변호사와 김경필 머니트레이너의 공개 자료를 참고해 RetireLab이 재구성한 비공식 자산·소비 진단입니다.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 주거 형태 토글에 따른 UI 업데이트
+    document.querySelectorAll('input[name="housing"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const isOwner = e.target.value === 'yes';
+            document.getElementById('housingCostOwner').style.display = isOwner ? 'flex' : 'none';
+            document.getElementById('housingCostRenter').style.display = isOwner ? 'none' : 'flex';
+            
+            document.getElementById('labelRealEstate').innerText = isOwner ? '🏠 주택 순자산' : '🏠 주거 보증금 순자산';
+            document.getElementById('hintRealEstate').innerHTML = isOwner 
+                ? '(현재 주택 시세 - 주담대 잔액)<br>※ 기본 시뮬레이션에서는 주택 가격상승률 0% 적용' 
+                : '(전세·월세 보증금 - 보증금대출 잔액)<br>※ 주거 보증금은 투자수익률 0% 적용';
+        });
+    });
+
+    function toggleConsumption(el) {
+        const inputs = document.getElementById('consumptionInputs');
+        const isOpen = inputs.style.display === 'block';
+        inputs.style.display = isOpen ? 'none' : 'block';
+        el.innerText = isOpen ? '📊 소비등급도 같이 진단받기 (선택) ▼' : '📊 소비등급 입력 닫기 ▲';
+    }
+
+    function formatCurrency(value) {
+        if(value <= 0) return '0원';
+        if(value >= 10000) {
+            const uk = Math.floor(value / 10000);
+            const man = value % 10000;
+            return man > 0 ? `${uk}억 ${man.toLocaleString()}만 원` : `${uk}억 원`;
+        }
+        return `${value.toLocaleString()}만 원`;
+    }
+
+    function formatDuration(monthsValue) {
+        const totalMonths = Math.max(0, Math.round(monthsValue));
+        const years = Math.floor(totalMonths / 12);
+        const months = totalMonths % 12;
+
+        if (years > 0 && months > 0) return `${years}년 ${months}개월`;
+        if (years > 0) return `${years}년`;
+        if (months > 0) return `${months}개월`;
+        return '약간'; // 0일 경우
+    }
+
+    // 허들 관리
+    const hurdles30 = [
+        { grade: 'C', target: 3000, title: '생존 궤도 진입', desc: '악성 부채를 청산하고 최소 비상금을 모으는 시기입니다. 투기 금지, 생존 우선.' },
+        { grade: 'B', target: 20000, title: '본격 자산 축적기', desc: '성실하게 종잣돈을 모으는 구간입니다. 저축 습관을 잃지 말고 꾸준히 밀어붙이세요.' },
+        { grade: 'A', target: 50000, title: '마의 구간 돌파', desc: '가장 방심하기 쉬운 마의 구간을 넘었습니다. 보상 소비(차량, 여행) 유혹을 이겨내야 격차가 벌어집니다.' },
+        { grade: 'S', target: 70000, title: '자수성가 상위 5%', desc: '자수성가 S등급 기준입니다. 방어적 수성과 세금 관리가 핵심이며, 현금흐름 파이프라인을 구축하세요.' }
+    ];
+
+    const hurdles40 = [
+        { grade: 'C', target: 10000, title: '생존 궤도 진입', desc: '노후 대비 실질 위험군입니다. 모든 지출을 통제하고 비상금과 저축액을 극대화해야 합니다.' },
+        { grade: 'B', target: 30000, title: '유동성 빈곤 탈출', desc: '통계적 중위값이지만 멈춰선 안 됩니다. 대출 낀 자가 보유의 함정에서 벗어나 현금성 자산을 모아가세요.' },
+        { grade: 'A', target: 70000, title: '부자의 기준선 진입', desc: '마의 구간을 돌파했습니다. 자녀 교육비 과다 지출과 차량 업그레이드 유혹을 철저히 차단하세요.' },
+        { grade: 'S', target: 200000, title: '경제적 자유의 초입', desc: '단순 자산 규모를 넘어 강력한 월 현금흐름을 완성하는 시기입니다. 부동산에만 묶여있다면 포트폴리오를 다각화하세요.' }
+    ];
+
+    function getHurdlesByAge(targetAge) {
+        if (targetAge >= 30 && targetAge < 40) return hurdles30;
+        if (targetAge >= 40 && targetAge < 50) return hurdles40;
+        return null;
+    }
+
+    function getGradeByAgeAndNetWorth(targetAge, targetNetWorth) {
+        const hurdles = getHurdlesByAge(targetAge);
+        if (!hurdles) return null;
+        let grade = 'D';
+        for (let i = hurdles.length - 1; i >= 0; i--) {
+            if (targetNetWorth >= hurdles[i].target) {
+                grade = hurdles[i].grade;
+                break;
+            }
+        }
+        return grade;
+    }
+
+    const crossMessages = {
+        'S-S': { label: '🏆 완성형 자산가', color: '#d97706', msg: '자산도 소비도 최고 수준입니다. 이제 세금·증여·은퇴 구조 설계에 집중하세요.' },
+        'S-A': { label: '✅ 안정형 자산가', color: '#2563eb', msg: '자산은 최상위이고 소비도 안정적입니다. 현금흐름 파이프라인을 더 강화하세요.' },
+        'S-B': { label: '⚠️ 성장형 S — 소비 통제 필요', color: '#ea580c', msg: '자산은 상위권이지만 소비 구조가 느슨합니다. 차량·여행·취미 지출이 현금흐름을 갉고 있습니다.' },
+        'S-C': { label: '🔴 자산 S, 소비 위험', color: '#dc2626', msg: '순자산은 크지만 소비 통제가 무너지고 있습니다. 지금 당장 지출 구조를 점검하세요.' },
+        'S-D': { label: '🚨 자산은 크지만 구조가 무너지는 중', color: '#dc2626', msg: '소비가 자산 증가 속도를 완전히 갉아먹고 있습니다. S등급을 유지하려면 즉각적인 지출 조정이 필요합니다.' },
+        'A-S': { label: '🚀 S등급 추격자', color: '#2563eb', msg: '소비 통제력이 탁월합니다. 이 저축률을 유지하면 S등급 진입 가능성이 매우 높습니다.' },
+        'A-A': { label: '✅ 균형 잡힌 A등급', color: '#2563eb', msg: '자산과 소비가 균형 잡혀 있습니다. 교육비 과다 지출만 조심하면 됩니다.' },
+        'A-B': { label: '⚠️ A등급, 소비 주의', color: '#ea580c', msg: '자산은 좋지만 소비가 조금씩 새고 있습니다. 특히 차량·여행 지출을 점검하세요.' },
+        'A-C': { label: '🔴 겉은 A, 속은 위험', color: '#dc2626', msg: '소득과 자산은 괜찮습니다. 하지만 소비가 자산 증가 속도를 갉아먹고 있습니다.' },
+        'A-D': { label: '🚨 겉은 A, 구조는 붕괴 직전', color: '#dc2626', msg: '투자 수익률보다 지출 통제가 먼저입니다. 차량·외식·취미비를 즉각 점검하세요.' },
+        'B-S': { label: '🚀 조용한 추격자', color: '#16a34a', msg: '자산은 아직 작지만 소비 통제력이 탁월합니다. A등급 진입이 멀지 않았습니다.' },
+        'B-A': { label: '✅ B등급 안정 성장형', color: '#16a34a', msg: '이 속도라면 A등급 진입이 보입니다. 저축률을 조금만 더 올려보세요.' },
+        'B-B': { label: '⚠️ 마의 구간 경계선', color: '#ea580c', msg: '가장 방심하기 쉬운 구간입니다. 보상 소비 유혹을 이겨내야 A등급이 열립니다.' },
+        'B-C': { label: '🔴 마의 구간에서 미끄러지는 중', color: '#dc2626', msg: '소비가 자산 형성 속도를 갉고 있습니다. 고가 차량·과도한 여행 지출을 지금 당장 멈추세요.' },
+        'B-D': { label: '🚨 마의 구간 붕괴 위험', color: '#dc2626', msg: '가장 위험한 조합입니다. 지금 소비를 통제하지 못하면 C등급으로 미끄러집니다.' },
+        'C-S': { label: '✅ 느리지만 회복 가능한 구조', color: '#16a34a', msg: '자산은 적지만 소비 통제를 잘하고 있습니다. 이 속도라면 반드시 올라갑니다.' },
+        'C-A': { label: '✅ C등급 탈출 준비 중', color: '#16a34a', msg: '소비는 안정적입니다. 소득 증대에 집중하면 B등급 진입이 가능합니다.' },
+        'C-B': { label: '⚠️ C등급 정체 위험', color: '#ea580c', msg: '소비를 조금만 줄이면 저축률이 확 올라갑니다. 고정비 점검을 먼저 하세요.' },
+        'C-C': { label: '🔴 C등급 장기 고착 위험', color: '#dc2626', msg: '이 상태가 지속되면 노후 빈곤으로 이어질 수 있습니다. 지출 구조 전면 재검토가 필요합니다.' },
+        'C-D': { label: '🚨 C등급 하락 위험', color: '#dc2626', msg: '자산도 소비도 위험 신호입니다. 배달앱, 구독 서비스, 습관성 지출을 즉각 차단하세요.' },
+        'D-S': { label: '✅ D등급 탈출 가능성 있음', color: '#16a34a', msg: '소비 통제는 잘 하고 있습니다. 부채를 정리하고 저축을 시작하면 C등급 진입이 가능합니다.' },
+        'D-A': { label: '⚠️ D등급, 소비는 선방 중', color: '#ea580c', msg: '소비는 나쁘지 않습니다. 부채 정리와 비상금 확보에 집중하세요.' },
+        'D-B': { label: '🔴 D등급 주의 구간', color: '#dc2626', msg: '소비를 더 줄여야 합니다. 재무 구조 전면 점검이 필요합니다.' },
+        'D-C': { label: '🚨 재무 응급실 진입 직전', color: '#dc2626', msg: '소비 통제가 시급합니다. 지금 행동하지 않으면 회복이 더 어려워집니다.' },
+        'D-D': { label: '🚨 재무 응급실', color: '#dc2626', msg: '지금은 투자보다 생존이 먼저입니다. 한 방 역전 시도 금지. 비상금 확보와 지출 차단이 최우선입니다.' }
+    };
+
+    function calcConsumptionGrade(income, carPrice, annualTravel, actualHousingCost, monthlyFood, monthlyLeisure, targetSavingsRatio, factor) {
+        let score = 0;
+        
+        if (targetSavingsRatio >= 50) score += 5; 
+        else if (targetSavingsRatio >= 40) score += 4; 
+        else if (targetSavingsRatio >= 30) score += 3; 
+        else if (targetSavingsRatio >= 10) score += 1;
+        else score -= 3;
+
+        const carMonths = carPrice / income;
+        if (carMonths <= 3 * factor) score += 5; 
+        else if (carMonths <= 6 * factor) score += 4; 
+        else if (carMonths <= 9 * factor) score += 2; 
+        else if (carMonths <= 12 * factor) score += 1; 
+        else if (carMonths <= 18 * factor) score -= 1; 
+        else score -= 3;
+
+        const travelRatio = annualTravel / (income * 12) * 100;
+        if (travelRatio <= 3 * factor) score += 5; 
+        else if (travelRatio <= 5 * factor) score += 4; 
+        else if (travelRatio <= 8 * factor) score += 2; 
+        else if (travelRatio <= 10 * factor) score += 1; 
+        else if (travelRatio <= 15 * factor) score -= 1; 
+        else score -= 3;
+
+        const housingRatio = actualHousingCost / income * 100;
+        if (housingRatio <= 10 * factor) score += 5;
+        else if (housingRatio <= 15 * factor) score += 4;
+        else if (housingRatio <= 25 * factor) score += 2;
+        else if (housingRatio <= 30 * factor) score += 1;
+        else if (housingRatio <= 40 * factor) score -= 1;
+        else score -= 3;
+
+        const foodRatio = monthlyFood / income * 100;
+        if (foodRatio <= 20 * factor) score += 5; 
+        else if (foodRatio <= 25 * factor) score += 4; 
+        else if (foodRatio <= 30 * factor) score += 2; 
+        else if (foodRatio <= 40 * factor) score += 1; 
+        else if (foodRatio <= 50 * factor) score -= 1; 
+        else score -= 3;
+
+        const leisureRatio = monthlyLeisure / income * 100;
+        if (leisureRatio <= 5 * factor) score += 5; 
+        else if (leisureRatio <= 10 * factor) score += 4; 
+        else if (leisureRatio <= 15 * factor) score += 2; 
+        else if (leisureRatio <= 20 * factor) score += 1; 
+        else if (leisureRatio <= 30 * factor) score -= 1; 
+        else score -= 3;
+
+        if (score >= 26) return 'S';
+        if (score >= 21) return 'A';
+        if (score >= 15) return 'B';
+        if (score >= 9) return 'C';
+        return 'D';
+    }
+
+    function getSignal(actual, limit) {
+        if (actual <= 0) return '';
+        const isOver = actual > limit;
+        const overAmt = actual - limit;
+        if (isOver) {
+            return `<div class="limit-desc" style="color:#dc2626; font-weight:600; margin-top:4px;">
+                🔴 한도 ${formatCurrency(overAmt)} 초과 (실지출: ${formatCurrency(actual)})
+            </div>`;
+        } else {
+            return `<div class="limit-desc" style="color:#16a34a; font-weight:600; margin-top:4px;">
+                🟢 한도 내 (실지출: ${formatCurrency(actual)})
+            </div>`;
+        }
+    }
+
+    function calculateLimits() {
+        const age = parseInt(document.getElementById('currentAge').value);
+        if(!Number.isFinite(age) || age < 30 || age > 49) {
+            alert('현재 버전은 30세부터 49세까지만 진단할 수 있습니다.');
+            return;
+        }
+
+        const income = parseInt(document.getElementById('monthlyIncome').value) || 0;
+        if(!income) {
+            alert('월 소득을 정확히 입력해주세요.');
+            return;
+        }
+
+        const isOwner = document.querySelector('input[name="housing"]:checked').value === 'yes';
+        const savingsRate = parseInt(document.getElementById('targetSavingsRate').value);
+        
+        const realEstate = parseInt(document.getElementById('realEstate').value) || 0;
+        const financial = parseInt(document.getElementById('financial').value) || 0;
+        const netWorth = realEstate + financial;
+
+        const annualReturnRate = parseInt(document.querySelector('input[name="returnRate"]:checked').value) / 100;
+        const monthlyReturnRate = Math.pow(1 + annualReturnRate, 1 / 12) - 1; // 복리 기준 역산
+
+        // 주거비용 및 생활예산 도출 로직
+        let actualHousingCost = 0; 
+        let forcedSavings = 0;     
+        if (isOwner) {
+            const costPrincipal = parseInt(document.getElementById('costPrincipal').value) || 0;
+            const costInterest = parseInt(document.getElementById('costInterest').value) || 0;
+            const costMaintOwner = parseInt(document.getElementById('costMaintOwner').value) || 0;
+            actualHousingCost = costInterest + costMaintOwner;
+            forcedSavings = costPrincipal;
+        } else {
+            const costRent = parseInt(document.getElementById('costRent').value) || 0;
+            const costJeonseInterest = parseInt(document.getElementById('costJeonseInterest').value) || 0;
+            const costMaintRenter = parseInt(document.getElementById('costMaintRenter').value) || 0;
+            actualHousingCost = costRent + costJeonseInterest + costMaintRenter;
+        }
+
+        const targetSavings = Math.floor(income * savingsRate / 100);
+        const actualSavingsForProjection = Math.max(targetSavings, forcedSavings);
+        const additionalFinancialSavings = isOwner ? Math.max(0, targetSavings - forcedSavings) : targetSavings;
+        const livingBudget = income - actualSavingsForProjection - actualHousingCost;
+
+        // 소비 항목 유효성 체크
+        const carRaw = document.getElementById('carPrice').value.trim();
+        const travelRaw = document.getElementById('annualTravel').value.trim();
+        const foodRaw = document.getElementById('monthlyFood').value.trim();
+        const leisureRaw = document.getElementById('monthlyLeisure').value.trim();
+        
+        let hasConsumptionInput = false;
+        if (carRaw !== '' || travelRaw !== '' || foodRaw !== '' || leisureRaw !== '') {
+            if (carRaw === '' || travelRaw === '' || foodRaw === '' || leisureRaw === '') {
+                alert('소비등급을 계산하려면 모든 소비항목을 입력하세요.\n차량이 없다면 차량 가격에 0을 입력하세요.');
+                return;
+            }
+            hasConsumptionInput = true;
+        }
+        
+        const carPrice = parseInt(carRaw) || 0;
+        const annualTravel = parseInt(travelRaw) || 0;
+        const monthlyFood = parseInt(foodRaw) || 0;
+        const monthlyLeisure = parseInt(leisureRaw) || 0;
+
+        // 1. 현재 자산 등급 판별
+        const currentGrade = getGradeByAgeAndNetWorth(age, netWorth) || 'D';
+
+        // 2. 자산 등급별 소비 한도 보정 (factor)
+        const assetLimitFactor = { 'D': 0.90, 'C': 0.95, 'B': 1.00, 'A': 1.05, 'S': 1.10 };
+        const factor = assetLimitFactor[currentGrade];
+
+        let carLimit = Math.round(income * (isOwner ? 6 : 4) * factor);
+        let carDesc = isOwner ? `월소득(${income}만 원) × 6개월치 기준 (자가 보유)` : `월소득(${income}만 원) × 4개월치 기준 (무주택)`;
+        if (income < 300) { carLimit = 0; carDesc = '⚠️ 월소득 300만 원 미만 — RetireLab 보수적 내부 기준: 차량 구매 금지 구간'; }
+        
+        const annualTravelLimit = Math.round(income * 12 * 0.05 * factor);
+        const foodLimit = Math.round(income * 0.25 * factor);
+        const leisureLimit = Math.round(income * 0.10 * factor);
+        const housingLimit = Math.round(income * 0.15 * factor);
+
+        // 3. 소비등급 및 교차 판정
+        let consumptionGrade = null;
+        if (hasConsumptionInput) {
+            consumptionGrade = calcConsumptionGrade(income, carPrice, annualTravel, actualHousingCost, monthlyFood, monthlyLeisure, savingsRate, factor);
+        }
+
+        // 현금흐름 점검
+        const monthlyTravelCost = annualTravel / 12;
+        const totalMonthlyOutflow = actualSavingsForProjection + actualHousingCost + monthlyTravelCost + monthlyFood + monthlyLeisure;
+        const monthlyCashFlow = income - totalMonthlyOutflow;
+
+        // UI 업데이트 시작 ----------------------------------------------------
+        const gradeColors = { 'S': '#d97706', 'A': '#2563eb', 'B': '#16a34a', 'C': '#ea580c', 'D': '#dc2626' };
+        
+        const ageLabel = age < 40 ? '30대' : '40대';
+        const badge = document.getElementById('gradeBadge');
+        badge.innerText = `${ageLabel} 자산 ${currentGrade}등급`;
+        badge.style.backgroundColor = gradeColors[currentGrade] || '#64748b';
+
+        const consumptionBadge = document.getElementById('consumptionBadge');
+        const crossCard = document.getElementById('crossResultCard');
+        if (consumptionGrade) {
+            consumptionBadge.style.display = 'inline-block';
+            consumptionBadge.innerText = `소비 ${consumptionGrade}등급`;
+            consumptionBadge.style.backgroundColor = gradeColors[consumptionGrade] || '#64748b';
+            document.getElementById('descSavings').innerHTML = `목표 저축률 ${savingsRate}%<br><span style="font-size:0.75rem; color:#64748b;">(소비등급은 목표 저축계획을 실제로 지킨다는 가정으로 계산됩니다.)</span>`;
+
+            const crossKey = `${currentGrade}-${consumptionGrade}`;
+            const crossData = crossMessages[crossKey];
+            if (crossData) {
+                crossCard.style.display = 'block';
+                crossCard.style.backgroundColor = crossData.color + '15';
+                crossCard.style.border = `1px solid ${crossData.color}40`;
+                crossCard.innerHTML = `<div style="font-weight: 800; color: ${crossData.color}; margin-bottom: 4px;">${crossData.label}</div><div style="color: var(--text-main);">${crossData.msg}</div>`;
+            }
+        } else {
+            consumptionBadge.style.display = 'none';
+            crossCard.style.display = 'none';
+            document.getElementById('descSavings').innerText = `목표 저축률 ${savingsRate}%`;
+        }
+
+        // 현금흐름 경고 배너 표시 (소비 입력 시)
+        const cfWarning = document.getElementById('cashflowWarning');
+        const cfSuccess = document.getElementById('cashflowSuccess');
+        const forecastDisclaimer = document.getElementById('forecastDisclaimer');
+        
+        if (hasConsumptionInput) {
+            if (monthlyCashFlow < 0) {
+                cfWarning.style.display = 'block';
+                cfSuccess.style.display = 'none';
+                document.getElementById('cashflowText').innerHTML = `입력한 저축과 소비를 모두 유지하면<br><b>월 약 ${formatCurrency(Math.abs(monthlyCashFlow))}이 부족합니다.</b><br><br>현재 소비구조에서는 목표 저축률(${savingsRate}%)을<br>실제로 달성하기 어렵습니다.`;
+                forecastDisclaimer.innerHTML = `※ 아래 미래 자산은 목표 저축을 실제로 달성한다는 가정입니다.<br>현재 입력 소비구조에서는 실행 가능성이 낮을 수 있습니다.`;
+            } else {
+                cfWarning.style.display = 'none';
+                cfSuccess.style.display = 'block';
+                document.getElementById('cashflowSuccessText').innerHTML = `입력한 저축과 소비 후 월 ${formatCurrency(monthlyCashFlow)}이 남습니다.`;
+                forecastDisclaimer.innerHTML = '';
+            }
+        } else {
+            cfWarning.style.display = 'none';
+            cfSuccess.style.display = 'none';
+            forecastDisclaimer.innerHTML = '';
+        }
+
+        // 소비 한도 초과 항목 요약 경고 배너
+        const overItems = [];
+        if (hasConsumptionInput) {
+            if (actualHousingCost > housingLimit && actualHousingCost > 0) {
+                overItems.push(`🏠 주거비 ${formatCurrency(actualHousingCost - housingLimit)} 초과`);
+            }
+            if (carPrice > 0 && carLimit === 0) {
+                overItems.push(`🚗 차량 보유 — 구매 금지 구간 (월소득 300만 원 미만)`);
+            } else if (carPrice > carLimit && carPrice > 0) {
+                overItems.push(`🚗 차량 ${formatCurrency(carPrice - carLimit)} 초과`);
+            }
+            if (annualTravel > annualTravelLimit && annualTravel > 0)
+                overItems.push(`✈️ 여행 ${formatCurrency(annualTravel - annualTravelLimit)} 초과`);
+            if (monthlyFood > foodLimit && monthlyFood > 0)
+                overItems.push(`🍽️ 식비 ${formatCurrency(monthlyFood - foodLimit)} 초과`);
+            if (monthlyLeisure > leisureLimit && monthlyLeisure > 0)
+                overItems.push(`🎯 레저 ${formatCurrency(monthlyLeisure - leisureLimit)} 초과`);
+
+            const banner = document.getElementById('overLimitBanner');
+            if (overItems.length > 0) {
+                banner.style.display = 'block';
+                banner.innerHTML = `
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px;">
+                        <div style="font-weight:700; color:#dc2626; margin-bottom:6px;">
+                            ⚠️ 소비 한도 초과 항목 (${overItems.length}개)
+                        </div>
+                        <div style="font-size:0.85rem; color:#991b1b; line-height:1.8;">
+                            ${overItems.join('<br>')}
+                        </div>
+                        <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+                            소비등급과 무관하게 초과 항목은 자산 증식을 갉아먹습니다.
+                        </div>
+                    </div>`;
+            } else {
+                banner.style.display = 'none';
+            }
+        } else {
+            document.getElementById('overLimitBanner').style.display = 'none';
+        }
+
+        // 생활가용예산 박스 업데이트
+        document.getElementById('bonusMath').innerText = `월소득(${formatCurrency(income)}) - 실제반영저축(${formatCurrency(actualSavingsForProjection)}) - 실주거비(${formatCurrency(actualHousingCost)})`;
+        document.getElementById('bonusResult').innerText = `생활가용예산: 월 ${formatCurrency(livingBudget)}`;
+
+        document.getElementById('valSavings').innerText = formatCurrency(targetSavings);
+        if (forcedSavings > 0) {
+            document.getElementById('descSavings').innerHTML = `목표 저축액 ${formatCurrency(targetSavings)} <br><span style="color:#0f172a; font-weight:600;">(주담대 원금 강제저축 ${formatCurrency(forcedSavings)}이 포함되어 계산됨)</span>`;
+        }
+        
+        // 소비 한도 DOM 업데이트
+        document.getElementById('valHousing').innerText = formatCurrency(housingLimit);
+        let housingDiagnosisHtml = `<div class="limit-desc">원소득 15% 이내</div>`;
+        if (hasConsumptionInput && actualHousingCost > 0) {
+            housingDiagnosisHtml += getSignal(actualHousingCost, housingLimit);
+        }
+        document.getElementById('descHousingDiagnosis').innerHTML = housingDiagnosisHtml;
+
+        document.getElementById('valCar').innerText = formatCurrency(carLimit);
+        let carDiagnosisHtml = `<div class="limit-desc">${carDesc}</div>`;
+        if (hasConsumptionInput && carPrice > 0) {
+            if (carLimit === 0) {
+                carDiagnosisHtml += `<div class="limit-desc" style="color:#dc2626; font-weight:600; margin-top:4px;">
+                    🚫 구매 금지 구간 — RetireLab 보수적 내부 기준:<br>현재 구간에서는 신규 차량 구매보다 비상금과 금융자산 확보를 우선합니다.
+                </div>`;
+            } else {
+                carDiagnosisHtml += getSignal(carPrice, carLimit);
+            }
+        }
+        document.getElementById('descCarDiagnosis').innerHTML = carDiagnosisHtml;
+
+        document.getElementById('valTravel').innerText = formatCurrency(annualTravelLimit);
+        let travelDiagnosisHtml = `<div class="limit-desc">원소득 5% 이내</div>`;
+        if (hasConsumptionInput && annualTravel > 0) {
+            travelDiagnosisHtml += getSignal(annualTravel, annualTravelLimit);
+        }
+        document.getElementById('descTravelDiagnosis').innerHTML = travelDiagnosisHtml;
+
+        document.getElementById('valFood').innerText = formatCurrency(foodLimit);
+        let foodDiagnosisHtml = `<div class="limit-desc">원소득 25% 이내</div>`;
+        if (hasConsumptionInput && monthlyFood > 0) {
+            foodDiagnosisHtml += getSignal(monthlyFood, foodLimit);
+        }
+        document.getElementById('descFoodDiagnosis').innerHTML = foodDiagnosisHtml;
+
+        document.getElementById('valLeisure').innerText = formatCurrency(leisureLimit);
+        let leisureDiagnosisHtml = `<div class="limit-desc">원소득 10% 이내</div>`;
+        if (hasConsumptionInput && monthlyLeisure > 0) {
+            leisureDiagnosisHtml += getSignal(monthlyLeisure, leisureLimit);
+        }
+        document.getElementById('descLeisureDiagnosis').innerHTML = leisureDiagnosisHtml;
+
+        // 4. 세대 종료 시점 시뮬레이션
+        const forecastAge = age < 40 ? 39 : 49;
+        const monthsToForecast = Math.max(0, (forecastAge - age) * 12);
+        
+        let simHousing = realEstate;
+        let simFinancial = financial;
+
+        for (let m = 0; m < monthsToForecast; m++) {
+            if (isOwner) simHousing += forcedSavings;
+            simFinancial = simFinancial * (1 + monthlyReturnRate) + additionalFinancialSavings;
+        }
+        const projectedNetWorthInDecade = Math.floor(simHousing + simFinancial);
+        
+        const projectedGrade = getGradeByAgeAndNetWorth(forecastAge, projectedNetWorthInDecade) || 'D';
+
+        const forecastTitle = document.getElementById('forecastTitle');
+        const forecastGrade = document.getElementById('forecastGrade');
+        const forecastDesc = document.getElementById('forecastDesc');
+
+        forecastTitle.innerText = `⏳ ${forecastAge}세 도달 시점 예상 위치`;
+        
+        let projectionText = `${forecastAge < 40 ? '30대' : '40대'} ${projectedGrade}등급 `;
+        if (projectedGrade === currentGrade) projectionText += '유지 예상';
+        else if (projectedGrade > currentGrade) projectionText += '진입 예상'; // Note: String comparison works for A,B,C,D but A is lower than B in ascii. Actually D>C>B>A>S in value but reverse in ascii. It's safer to just say "진입 예상".
+        else projectionText += '예상';
+
+        forecastGrade.innerText = projectionText;
+        forecastGrade.style.color = (projectedGrade === 'S' || projectedGrade === 'A') ? '#fde047' : '#ffffff'; 
+        forecastDesc.innerText = `예상 총 순자산: ${formatCurrency(projectedNetWorthInDecade)} 전후`;
+
+        // 5. 로드맵 타임라인 (최대 49세)
+        const timelineContainer = document.getElementById('roadmapTimeline');
+        const badgeContainer = document.getElementById('efficiencyBadge');
+        timelineContainer.innerHTML = '';
+        badgeContainer.innerHTML = '';
+        badgeContainer.className = 'efficiency-badge';
+
+        if (currentGrade === 'S') {
+            timelineContainer.innerHTML = `
+                <div class="roadmap-step step-s">
+                    <div class="step-header">
+                        <span class="step-grade">S 등급</span>
+                        <span class="step-age">🎯 이미 달성함</span>
+                    </div>
+                    <div class="step-title">축하합니다! 현금흐름 구조화에 집중하세요.</div>
+                    <div class="step-desc">이미 해당 연령대의 최고 궤도에 진입했습니다.<br>이제는 잉여 저축액을 바탕으로 배당, 이자, 연금 등 강력한 현금흐름 파이프라인을 구축하세요.</div>
+                </div>
+            `;
+            badgeContainer.style.display = 'none';
+
+        } else if (currentGrade === 'D' && age < 40) {
+            // D등급 특별 처리 (30대 한정, 40대 D도 동일하게 처리 가능)
+            timelineContainer.innerHTML = `
+                <div style="border-left: 3px solid #dc2626; padding-left: 16px; margin-left: 0; border-radius: 4px;">
+                    <div class="step-header">
+                        <span class="step-grade" style="color: #dc2626; font-size: 1.1rem;">🚨 D등급 — 재무 응급실</span>
+                    </div>
+                    <div class="step-title" style="margin: 8px 0; color: #991b1b;">지금은 투자보다 생존이 먼저입니다.</div>
+                    <div class="step-desc" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; line-height: 1.8;">
+                        ✂️ <b>즉시 실행:</b> 배달앱 삭제 / 구독 서비스 전면 정리 / 신용카드 해지<br>
+                        🚫 <b>절대 금지:</b> 코인·테마주·레버리지 — 한 방 역전 시도 금지.<br>
+                        🏦 <b>최우선 목표:</b> 비상금 확보와 지출 차단이 최우선입니다.<br>
+                        📈 <b>탈출 조건:</b> 목표 저축률 달성 + 순자산 플러스 전환 시 C등급 로드맵 활성화됩니다.
+                    </div>
+                </div>
+            `;
+            badgeContainer.style.display = 'none';
+
+        } else {
+            badgeContainer.style.display = 'block';
+            let html = '';
+            
+            const maxMonths = (49 - age + 1) * 12; // 49세 말일까지
+            let simH = realEstate;
+            let simF = financial;
+            
+            const gradeMap = {'D': 0, 'C': 1, 'B': 2, 'A': 3, 'S': 4};
+            let highestGradeIndex = gradeMap[currentGrade];
+            let currentSimGrade = currentGrade;
+            
+            let milestones = [];
+            let lastAgeDecade = age < 40 ? 30 : 40;
+
+            for(let m = 1; m <= maxMonths; m++) {
+                if (isOwner) simH += forcedSavings;
+                simF = simF * (1 + monthlyReturnRate) + additionalFinancialSavings;
+                const totalSimAsset = simH + simF;
+                
+                const currentSimAge = age + Math.floor(m / 12);
+                const currentSimDecade = currentSimAge < 40 ? 30 : 40;
+                const newSimGrade = getGradeByAgeAndNetWorth(currentSimAge, totalSimAsset);
+                
+                // 나이 앞자리 바뀔 때 (39 -> 40)
+                if (currentSimDecade > lastAgeDecade) {
+                    if (gradeMap[newSimGrade] < gradeMap[currentSimGrade]) {
+                        milestones.push({
+                            type: 'transition',
+                            age: currentSimAge,
+                            months: m,
+                            grade: newSimGrade,
+                            prevGrade: currentSimGrade
+                        });
+                        // 등급이 떨어졌으므로 highest 갱신 기준도 낮춤
+                        highestGradeIndex = gradeMap[newSimGrade]; 
+                    }
+                    lastAgeDecade = currentSimDecade;
+                }
+
+                currentSimGrade = newSimGrade;
+
+                if (gradeMap[currentSimGrade] > highestGradeIndex) {
+                    milestones.push({
+                        type: 'achievement',
+                        grade: currentSimGrade,
+                        age: currentSimAge,
+                        months: m,
+                        targetAsset: (getHurdlesByAge(currentSimAge).find(h => h.grade === currentSimGrade) || {}).target
+                    });
+                    highestGradeIndex = gradeMap[currentSimGrade];
+                }
+
+                if (highestGradeIndex === 4) break; // S 도달
+            }
+
+            milestones.forEach(ms => {
+                if (ms.type === 'transition') {
+                    html += `
+                        <div class="roadmap-step step-transition">
+                            <div class="step-header">
+                                <span class="step-grade">⚠️ 40대 기준 전환</span>
+                                <span class="step-age">🎯 ${ms.age}세 진입</span>
+                            </div>
+                            <div class="step-title" style="color:#b45309;">기준 상향으로 인한 재분류 예상</div>
+                            <div class="step-desc" style="background:#fefce8; border-color:#fef08a;">
+                                30대 ${ms.prevGrade}등급 기준을 충족했지만,<br>
+                                40세부터 기준이 상승해 40대 ${ms.grade}등급으로 재분류될 수 있습니다.
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const hurdleData = getHurdlesByAge(ms.age).find(h => h.grade === ms.grade);
+                    const isSGrade = ms.grade === 'S';
+                    const stepClass = isSGrade ? 'roadmap-step step-s' : 'roadmap-step';
+                    
+                    html += `
+                        <div class="${stepClass}">
+                            <div class="step-header">
+                                <span class="step-grade">${ms.age < 40 ? '30대' : '40대'} ${ms.grade}등급</span>
+                                <span class="step-age">🎯 ${ms.age}세 도달 예상</span>
+                                <span class="step-time">(${formatDuration(ms.months)} 뒤)</span>
+                            </div>
+                            <div class="step-title">${hurdleData.title} <span class="step-target">- 목표: ${formatCurrency(hurdleData.target)}</span></div>
+                            <div class="step-desc">${hurdleData.desc}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (highestGradeIndex < 4) { // S 미도달
+                let failMsg = highestGradeIndex < 3 ? 'A등급과 S등급' : 'S등급';
+                html += `
+                    <div style="border-left: 3px solid #cbd5e1; padding-left: 16px; margin-left: 0; color: #64748b; font-size: 0.9rem;">
+                        ※ 49세까지 ${failMsg} 도달은 예상되지 않습니다.<br>50세 이후는 현재 버전의 계산 범위 밖입니다.
+                    </div>
+                `;
+            }
+
+            timelineContainer.innerHTML = html;
+
+            // 기준 저축률(30%) 비교 S등급 도달 계산
+            const baselineSavings = Math.floor(income * 0.30);
+            const baselineAdditional = isOwner ? Math.max(0, baselineSavings - forcedSavings) : baselineSavings;
+            let baseSimH = realEstate;
+            let baseSimF = financial;
+            let baseSMonths = 0;
+            let baseReachedS = false;
+
+            for(let m = 1; m <= maxMonths; m++) {
+                if (isOwner) baseSimH += forcedSavings;
+                baseSimF = baseSimF * (1 + monthlyReturnRate) + baselineAdditional;
+                const currentSimAge = age + Math.floor(m / 12);
+                if (getGradeByAgeAndNetWorth(currentSimAge, baseSimH + baseSimF) === 'S') {
+                    baseSMonths = m;
+                    baseReachedS = true;
+                    break;
+                }
+            }
+
+            const currentSms = milestones.find(m => m.grade === 'S');
+            
+            if (currentSms && baseReachedS) {
+                if (savingsRate > 30) {
+                    const savedMonths = baseSMonths - currentSms.months;
+                    if (savedMonths > 0) {
+                        badgeContainer.classList.add('efficiency-good');
+                        badgeContainer.innerHTML = `💡 <b>탁월한 결정입니다!</b> 저축률을 ${savingsRate}%로 높인 덕분에 30% 저축 대비 S등급 도달 나이를 <b style="color:var(--success)">${formatDuration(savedMonths)} 앞당겼습니다!</b>`;
+                    }
+                } else if (savingsRate < 30) {
+                    const lostMonths = currentSms.months - baseSMonths;
+                    if (lostMonths > 0) {
+                        badgeContainer.classList.add('efficiency-bad');
+                        badgeContainer.innerHTML = `⚠️ <b>소비 경보:</b> 저축률이 권장선(30%)보다 낮아, 최종 S등급 도달 나이가 <b style="color:var(--danger)">${formatDuration(lostMonths)} 지연</b>됩니다.`;
+                    }
+                } else {
+                    badgeContainer.style.background = 'var(--primary-light)';
+                    badgeContainer.style.border = '1px solid #bfdbfe';
+                    badgeContainer.style.color = '#1e40af';
+                    badgeContainer.innerHTML = `표준 권장 저축률(30%)을 지키고 있습니다. 이 페이스를 꾸준히 유지하세요!`;
+                }
+            } else {
+                badgeContainer.style.display = 'none'; // 한 쪽이라도 도달 못하면 뱃지 생략
+            }
+        }
+
+        document.getElementById('inputSection').style.display = 'none';
+        document.getElementById('resultSection').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    function copyResult() {
+        const assetGrade = document.getElementById('gradeBadge').innerText;
+        const consumptionGradeEl = document.getElementById('consumptionBadge');
+        const hasConsumption = consumptionGradeEl.style.display !== 'none';
+        const crossCardEl = document.getElementById('crossResultCard');
+
+        const carVal = document.getElementById('valCar').innerText;
+        const travelVal = document.getElementById('valTravel').innerText;
+        const forecastGrade = document.getElementById('forecastGrade').innerText;
+        const forecastDesc = document.getElementById('forecastDesc').innerText;
+
+        let crossLabel = '';
+        if (crossCardEl.style.display !== 'none') {
+            const labelEl = crossCardEl.querySelector('div[style*="font-weight: 800"]');
+            if (labelEl) crossLabel = labelEl.innerText;
+        }
+
+        const lines = [
+            '📊 RetireLab 자산×소비 진단 결과',
+            '─────────────────',
+            `${assetGrade}${hasConsumption ? ' × ' + consumptionGradeEl.innerText : ''}`,
+            crossLabel ? `판정: ${crossLabel}` : '',
+            '─────────────────',
+            `${forecastGrade}`,
+            `${forecastDesc}`,
+            '─────────────────',
+            `🚗 차량 한도: ${carVal}`,
+            `✈️ 연 여행 한도: ${travelVal}`,
+            '─────────────────',
+            '나는 몇 등급? 직접 진단해보기',
+            '👉 RetireLab: https://blog.naver.com/retirelab',
+        ].filter(Boolean).join('\n');
+
+        if(navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(lines)
+                .then(() => alert('📋 결과가 복사됐습니다!\nSNS나 카톡에 붙여넣기 해보세요 📤'))
+                .catch(() => copyFallback(lines));
+        } else {
+            copyFallback(lines);
+        }
+    }
+
+    function copyFallback(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            alert('📋 결과가 복사됐습니다!\nSNS나 카톡에 붙여넣기 해보세요 📤');
+        } catch (err) {
+            alert('복사 기능을 지원하지 않는 브라우저입니다.');
+        }
+        document.body.removeChild(ta);
+    }
+
+    function resetForm() {
+        document.getElementById('inputSection').style.display = 'block';
+        document.getElementById('resultSection').style.display = 'none';
+        window.scrollTo(0, 0);
+    }
+
+    function resetFormFull() {
+        const ids = ['currentAge', 'monthlyIncome', 'realEstate', 'financial',
+                     'costPrincipal', 'costInterest', 'costMaintOwner',
+                     'costRent', 'costJeonseInterest', 'costMaintRenter',
+                     'carPrice', 'annualTravel', 'monthlyFood', 'monthlyLeisure'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('targetSavingsRate').value = 40;
+        document.getElementById('savingsRateVal').innerText = '40%';
+        document.getElementById('houseYes').checked = true;
+        document.getElementById('housingCostOwner').style.display = 'flex';
+        document.getElementById('housingCostRenter').style.display = 'none';
+        
+        document.getElementById('labelRealEstate').innerText = '🏠 주택 순자산';
+        document.getElementById('hintRealEstate').innerHTML = '(현재 주택 시세 - 주담대 잔액)<br>※ 기본 시뮬레이션에서는 주택 가격상승률 0% 적용';
+
+        document.getElementById('consumptionInputs').style.display = 'none';
+        document.querySelector('[onclick*="toggleConsumption"]').innerText = '📊 소비등급도 같이 진단받기 (선택) ▼';
+        document.querySelector('input[name="returnRate"][value="3"]').checked = true;
+        document.getElementById('overLimitBanner').style.display = 'none';
+        resetForm();
+    }
+</script>
+
+</body>
+</html>
