@@ -157,6 +157,16 @@
             font-weight: bold; margin-bottom: 8px;
         }
 
+        /* 세대 시뮬레이션 박스 */
+        .decade-forecast {
+            background: linear-gradient(135deg, #1e3a8a, #312e81);
+            border-radius: 12px; padding: 20px; color: white;
+            margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;
+        }
+        .forecast-title { font-size: 0.95rem; color: #bfdbfe; margin-bottom: 8px; font-weight: 600; }
+        .forecast-grade { font-size: 1.5rem; font-weight: 800; color: #fde047; margin-bottom: 6px; }
+        .forecast-desc { font-size: 0.85rem; color: #e0e7ff; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; display: inline-block; margin-bottom: 10px;}
+
         /* 가용 예산 박스 */
         .bonus-box {
             background: linear-gradient(135deg, #f0fdf4, #dcfce7);
@@ -182,16 +192,6 @@
         .limit-title { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
         .limit-value { font-size: 1.2rem; font-weight: bold; color: var(--text-main); margin-bottom: 4px;}
         .limit-desc { font-size: 0.85rem; color: var(--primary); margin-top: 2px; line-height: 1.4; }
-
-        /* 세대 시뮬레이션 박스 */
-        .decade-forecast {
-            background: linear-gradient(135deg, #1e3a8a, #312e81);
-            border-radius: 12px; padding: 20px; color: white;
-            margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;
-        }
-        .forecast-title { font-size: 0.95rem; color: #bfdbfe; margin-bottom: 8px; font-weight: 600; }
-        .forecast-grade { font-size: 1.5rem; font-weight: 800; color: #fde047; margin-bottom: 6px; }
-        .forecast-desc { font-size: 0.85rem; color: #e0e7ff; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; display: inline-block; margin-bottom: 10px;}
 
         /* 로드맵 타임라인 스타일 */
         .roadmap-container { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e2e8f0; }
@@ -824,7 +824,6 @@
             hasConsumptionInput = true;
         }
         
-        // 주거비 빈칸 방지 로직 (소비 진단 시)
         if (hasConsumptionInput) {
             if (isOwner) {
                 const cpRaw = document.getElementById('costPrincipal').value.trim();
@@ -1011,7 +1010,7 @@
         document.getElementById('valSavings').innerText = formatCurrency(plannedTotalSavings);
         let savingsDescription = `목표 저축액: ${formatCurrency(targetSavings)}<br>주담대 원금상환: ${formatCurrency(forcedSavings)}<br>추가 금융저축: ${formatCurrency(plannedFinancialSavings)}`;
         if (consumptionGrade) {
-            savingsDescription += `<br><span style="font-size:0.75rem; color:#64748b;">소비등급은 이 저축계획을 실제로 지킨다는 가정으로 계산됩니다.</span>`;
+            savingsDescription += `<br><span style="font-size:0.75rem; color:#64748b; margin-top:4px; display:inline-block;">소비등급은 이 저축계획을 실제로 지킨다는 가정으로 계산됩니다.</span>`;
         }
         document.getElementById('descSavings').innerHTML = savingsDescription;
         
@@ -1067,7 +1066,7 @@
         const projectedGradeMain = getGradeByAgeAndNetWorth(forecastAge, projectedNetWorthMain) || 'D';
 
         const forecastTitle = document.getElementById('forecastTitle');
-        forecastTitle.innerText = `${forecastAge}세 도달 시점 예상 위치`;
+        forecastTitle.innerText = `⏳ ${forecastAge}세 도달 시점 예상 위치`;
 
         let projectionText = `${forecastAge < 40 ? '30대' : '40대'} ${projectedGradeMain}등급 `;
         if (gradeRank[projectedGradeMain] === gradeRank[currentGrade]) projectionText += '유지 예상';
